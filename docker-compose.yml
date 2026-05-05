@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  librarian-ai:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: librarian-ai
+    volumes:
+      - .:/app
+      - ${OBSIDIAN_VAULT_PATH:-./volumes/obsidian}:/mnt/obsidian
+      - ${PROJECTS_PATH:-./volumes/projects}:/mnt/projects
+    environment:
+      - OBSIDIAN_PATH=/mnt/obsidian
+      - PROJECTS_PATH=/mnt/projects
+      - OLLAMA_URL=http://host.docker.internal:11434
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    stdin_open: true
+    tty: true
+    command: python src/main.py
