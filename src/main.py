@@ -63,10 +63,8 @@ def app():
 def analyze(path: str):
     """Analisa um arquivo de código."""
     file_path = Path(path).resolve()
-    project_path = file_path.parent
-    # Tenta subir até achar a raiz (onde tem danger_line/) ou usa o parent
-    while project_path.parent != project_path and not (project_path / "danger_line").exists():
-        project_path = project_path.parent
+    # Define o projeto como o diretório pai do arquivo ou o próprio diretório se for um path de pasta
+    project_path = file_path if file_path.is_dir() else file_path.parent
 
     async def _run():
         providers, _, cache, store, _, _ = get_shared_state(project_path)
