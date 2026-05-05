@@ -1,0 +1,10 @@
+# Ignorar lixo técnico do Danger Line
+cache/
+logs/
+temp/
+
+# Manter o conhecimento (raw) e o wiki (opcional)
+!raw/
+!wiki/
+!project_card.md
+!config.json

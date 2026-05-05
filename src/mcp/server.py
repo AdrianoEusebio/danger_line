@@ -10,16 +10,22 @@ TDD: TDD-04-MCP-SERVER.MD
 from __future__ import annotations
 import os
 import sys
+import io
 from pathlib import Path
 from dotenv import load_dotenv
+
+# Forçar encoding UTF-8 para evitar erros no Windows e não sujar o stdout
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 from mcp.server.fastmcp import FastMCP # type: ignore
 
-# Adicionar a pasta 'src' ao sys.path para imports funcionarem em qualquer ambiente
+# Adicionar a pasta 'src' ao sys.path dinamicamente
 src_path = str(Path(__file__).parent.parent.resolve())
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
-# Carregar .env antes de qualquer outro import que dependa dele
+# Carregar .env
 env_path = Path(__file__).parent.parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
@@ -253,13 +259,20 @@ async def lint_wiki(project: str = "") -> str:
 async def get_project_card(project: str = "") -> str:
     """
     Retorna o Project Card do projeto.
-    Se não existir, gera um novo (deep scan, ~3000 tokens).
-
-    Args:
-        project: Nome do projeto (default: workspace atual)
+    Se não existir, gera um novo (deep scan).
     """
-    # TODO: Implementar ProjectCardEngine
-    return f"[STUB] get_project_card('{project}')\n⚠ Pending."
+    try:
+        obsidian = _get_obsidian()
+        if not project:
+            project = _get_workspace().name
+            
+        content = obsidian.get_project_card(project)
+        if not content:
+            return f"❌ NOT_FOUND: Project Card para '{project}' não encontrado no Obsidian."
+            
+        return content
+    except Exception as e:
+        return f"ERROR: {str(e)}"
 
 
 @mcp.tool()
