@@ -41,16 +41,12 @@ class ProjectBootstrap:
         """
         logger.info(f"Registering new project: {project_path}")
         
-        # 1. Criar estrutura danger_line/
-        dl_path = project_path / "danger_line"
-        dl_path.mkdir(exist_ok=True)
+        # 1. Obter/Criar storage centralizado (Zero Footprint no projeto)
+        from storage.manager import StorageManager
+        storage_mgr = StorageManager()
+        dl_path = storage_mgr.get_project_storage_path(project_path)
         
-        # 1.1 Criar .gitignore dentro da danger_line/
-        gitignore_path = dl_path / ".gitignore"
-        if not gitignore_path.exists():
-            gitignore_path.write_text("cache/\nraw/\n", encoding="utf-8")
-        
-        # Inicializar storage local
+        # Inicializar storage
         cache = AnalysisCache(dl_path / "cache")
         store = MarkdownStore(dl_path)
         analyzer = CodeAnalyzer(self.chain, cache, store)

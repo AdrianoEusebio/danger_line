@@ -92,21 +92,22 @@ Ao usar o Danger Line em um projeto pela primeira vez:
 "Registre o projeto em C:/MeuProjeto"
 
 # O sistema automaticamente:
-# 1. Cria a pasta MeuProjeto/danger_line/
-# 2. Gera config.toml e AGENT.md
+# 1. Cria uma pasta segura em Danger_line/storage/MeuProjeto_hash/ (Zero Footprint no seu projeto!)
+# 2. Gera config.toml e AGENT.md no storage centralizado
 # 3. Faz scan inicial (~3000 tokens, único)
 # 4. Cria Project Card no Obsidian vault
 ```
 
-### Estrutura criada no projeto:
+Sua estrutura de pastas original permanece **limpa**. Todos os dados ficam em:
+`Danger_line/storage/{nome_projeto}_{hash}/`
+
 ```
-MeuProjeto/
-└── danger_line/
-    ├── .gitignore      ← ignora cache/ e raw/ por padrão
-    ├── AGENT.md        ← instruções customizadas para o compilador
-    ├── config.toml     ← configurações do projeto
-    ├── raw/            ← dados brutos (append-only, não editar)
-    └── cache/          ← cache de análises (gerado automaticamente)
+storage/MeuProjeto_hash/
+├── .gitignore
+├── AGENT.md        ← instruções customizadas para o compilador
+├── config.toml     ← configurações do projeto
+├── raw/            ← dados brutos (append-only, não editar)
+└── cache/          ← cache de análises (gerado automaticamente)
 ```
 
 > Ver `documents/TEMPLATE_AGENTE.MD` para o template do `AGENT.md`.

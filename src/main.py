@@ -29,7 +29,7 @@ console = Console()
 # --- Helpers de Inicialização ---
 
 def get_shared_state(project_path: Path):
-    """Inicializa os serviços para um projeto específico."""
+    """Inicializa os serviços para um projeto específico usando storage centralizado."""
     providers = ProviderChain([GroqProvider(), GeminiProvider(), OllamaProvider()])
     
     vault_path = os.getenv("OBSIDIAN_VAULT_PATH")
@@ -37,8 +37,10 @@ def get_shared_state(project_path: Path):
         raise click.UsageError("OBSIDIAN_VAULT_PATH não configurado no .env")
         
     obsidian = ObsidianIntegration(vault_path)
-    dl_path = project_path / "danger_line"
-    dl_path.mkdir(exist_ok=True)
+    
+    from storage.manager import StorageManager
+    storage_mgr = StorageManager()
+    dl_path = storage_mgr.get_project_storage_path(project_path)
     
     cache = AnalysisCache(dl_path / "cache")
     store = MarkdownStore(dl_path)
@@ -86,8 +88,13 @@ def compile(project_path: str):
     
     async def _run():
         providers, _, _, _, _, _ = get_shared_state(path)
-        wiki_store = WikiStore(path / "danger_line" / "wiki")
-        compiler = KBCompiler(providers, wiki_store, path / "danger_line")
+        
+        from storage.manager import StorageManager
+        storage_mgr = StorageManager()
+        dl_path = storage_mgr.get_project_storage_path(path)
+        
+        wiki_store = WikiStore(dl_path / "wiki")
+        compiler = KBCompiler(providers, wiki_store, dl_path)
         
         with console.status("[bold blue]Compilando Knowledge Base..."):
             result = await compiler.compile_incremental()
@@ -108,7 +115,7 @@ def register(path: str):
         
         with console.status(f"[bold cyan]Registrando projeto em {project_path.name}..."):
             result = await bootstrap.register(project_path)
-            console.print(f"\n[bold green]🚀 Projeto registrado com sucesso![/bold green]")
+            console.print(f"\n[bold green]Projeto registrado com sucesso![/bold green]")
             console.print(f"Arquivos analisados: {result['files_analyzed']}")
             console.print(f"Project Card gerado no Obsidian.")
 

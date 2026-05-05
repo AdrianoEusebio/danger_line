@@ -57,13 +57,14 @@ graph TB
         EXTERNAL["💎 IA Potente<br>(Paga/MCP)"]
     end
 
-    subgraph "Camada de Storage"
+    subgraph "Camada de Storage (Centralizado)"
+        MGR["📂 Storage Manager<br>(Hash-based)"]
         MD["📄 Markdown\nStore"]
         CACHE["⚡ Cache\nJSON"]
-        OBS["📓 Obsidian\n(Obrigatório)"]
+        OBS["📓 Obsidian\n(Vault)"]
     end
 
-    subgraph "Knowledge Base (Karpathy)"
+    subgraph "Knowledge Base (Karpathy) - Centralizado"
         RAW_KB["📥 Raw Store\n(append-only)"]
         COMPILER_KB["🔨 KB Compiler\n(raw → wiki)"]
         WIKI_KB["📚 Wiki\n(compilado)"]

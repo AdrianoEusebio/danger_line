@@ -82,12 +82,14 @@ def _get_obsidian() -> ObsidianIntegration:
 
 def _get_orchestrator() -> AgentOrchestrator:
     workspace = _get_workspace()
-    dl_path = workspace / "danger_line"
-    dl_path.mkdir(exist_ok=True)
+    
+    from storage.manager import StorageManager
+    storage_mgr = StorageManager()
+    dl_path = storage_mgr.get_project_storage_path(workspace)
     
     cache = AnalysisCache(dl_path / "cache")
     store = MarkdownStore(dl_path)
-    wiki_store = WikiStore(workspace / "danger_line" / "wiki")
+    wiki_store = WikiStore(dl_path / "wiki")
     wiki_qa = WikiQA(_providers, wiki_store)
     
     return AgentOrchestrator(_providers, cache, store, wiki_qa, _tracker)
@@ -209,8 +211,12 @@ async def compile_knowledge() -> str:
     """
     try:
         workspace = _get_workspace()
-        wiki_store = WikiStore(workspace / "danger_line" / "wiki")
-        compiler = KBCompiler(_providers, wiki_store, workspace / "danger_line")
+        from storage.manager import StorageManager
+        storage_mgr = StorageManager()
+        dl_path = storage_mgr.get_project_storage_path(workspace)
+        
+        wiki_store = WikiStore(dl_path / "wiki")
+        compiler = KBCompiler(_providers, wiki_store, dl_path)
         
         result = await compiler.compile_incremental()
         
