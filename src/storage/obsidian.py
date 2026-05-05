@@ -49,7 +49,7 @@ class ObsidianIntegration:
         project_folder = self.projects_folder / project_name
         project_folder.mkdir(exist_ok=True)
 
-        card_path = project_folder / "project_card.md"
+        card_path = project_folder / f"{project_name}.md"
         card_path.write_text(card_content, encoding="utf-8")
         return card_path
 
@@ -73,7 +73,7 @@ class ObsidianIntegration:
 
     def get_project_card(self, project_name: str) -> str | None:
         """Retorna conteúdo do Project Card existente, ou None se não existir."""
-        card_path = self.projects_folder / project_name / "project_card.md"
+        card_path = self.projects_folder / project_name / f"{project_name}.md"
         if card_path.exists():
             return card_path.read_text(encoding="utf-8")
         return None

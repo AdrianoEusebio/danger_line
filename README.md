@@ -68,16 +68,16 @@ Edite `C:\Users\adria\.gemini\antigravity\mcp_config.json`:
 {
   "mcpServers": {
     "danger-line": {
-      "command": "uv",
-      "args": ["run", "python", "C:/path/to/Danger_line/src/mcp/server.py"],
-      "env": {
-        "GROQ_API_KEY": "sua-chave-aqui",
-        "OBSIDIAN_VAULT_PATH": "C:/Users/adria/OneDrive/Documentos/Danger_line/Danger Line"
-      }
+      "command": "python",
+      "args": ["src/mcp/server.py"],
+      "cwd": "C:/path/to/Danger_line"
     }
   }
 }
 ```
+
+> [!TIP]
+> Use o campo `cwd` para definir a raiz do projeto. O sistema carregará automaticamente o arquivo `.env` da raiz, não sendo mais necessário passar as chaves de API diretamente no JSON.
 
 Reinicie o Antigravity. O sistema detecta as tools automaticamente.
 
@@ -102,6 +102,7 @@ Ao usar o Danger Line em um projeto pela primeira vez:
 ```
 MeuProjeto/
 └── danger_line/
+    ├── .gitignore      ← ignora cache/ e raw/ por padrão
     ├── AGENT.md        ← instruções customizadas para o compilador
     ├── config.toml     ← configurações do projeto
     ├── raw/            ← dados brutos (append-only, não editar)

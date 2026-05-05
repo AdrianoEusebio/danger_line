@@ -45,6 +45,11 @@ class ProjectBootstrap:
         dl_path = project_path / "danger_line"
         dl_path.mkdir(exist_ok=True)
         
+        # 1.1 Criar .gitignore dentro da danger_line/
+        gitignore_path = dl_path / ".gitignore"
+        if not gitignore_path.exists():
+            gitignore_path.write_text("cache/\nraw/\n", encoding="utf-8")
+        
         # Inicializar storage local
         cache = AnalysisCache(dl_path / "cache")
         store = MarkdownStore(dl_path)
