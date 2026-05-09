@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 from fastmcp import FastMCP
 from src.shared.logger import logger
 from src.shared.config import Config
@@ -29,17 +32,37 @@ async def switch_brain(context_name: str) -> str:
 async def query_kb(query: str) -> str:
     """
     Searches the Knowledge Base (Obsidian) for relevant patterns, specs, or solutions.
-    Always prioritizes the active brain context.
+    Always prioritizes the active brain context using DFS (Direct File System).
     """
     logger.info(f"Querying KB for: {query}")
     relevant_folders = context_manager.get_relevant_folders()
     
-    # In a full implementation, this would use api_client.search() or vault.list_notes()
-    # For now, we list the relevant folders being searched
-    results = [f"Searching in folders: {', '.join(relevant_folders)}"]
-    
-    # Logic to fetch notes would go here
-    return "\n".join(results) + "\n\n(Feature: Search logic integration pending LRA connection)"
+    results = []
+    results.append(f"### 🔍 Search Results for: '{query}'")
+    results.append(f"Context: {context_manager.get_active_context().name}")
+    results.append(f"Searching in: {', '.join(relevant_folders)}\n")
+
+    found_any = False
+    for folder in relevant_folders:
+        notes = knowledge_engine.vault.list_notes(folder)
+        # Simple keyword match for the query in filenames
+        matches = [n for n in notes if query.lower() in n.lower()]
+        
+        for match in matches:
+            content = knowledge_engine.vault.read_note(folder, match)
+            if content:
+                found_any = True
+                results.append(f"---")
+                results.append(f"📄 **Note: {match}** (Folder: {folder})")
+                # Show first 300 chars of content as a snippet
+                snippet = content[:300].strip() + "..." if len(content) > 300 else content
+                results.append(snippet)
+
+    if not found_any:
+        results.append("⚠️ No matching notes found in the current context.")
+        results.append("Tip: Try switching brain context using 'switch_brain' if searching for another area.")
+
+    return "\n".join(results)
 
 @mcp.tool()
 async def commit_knowledge(raw_data: str, name: str, note_type: str = "Pattern") -> str:

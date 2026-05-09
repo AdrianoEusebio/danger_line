@@ -10,8 +10,8 @@ def setup_logger(name: str) -> logging.Logger:
     if not logger.handlers:
         logger.setLevel(Config.LOG_LEVEL)
         
-        # Console handler
-        handler = logging.StreamHandler(sys.stdout)
+        # Console handler - MUST use stderr for MCP protocols
+        handler = logging.StreamHandler(sys.stderr)
         handler.setLevel(Config.LOG_LEVEL)
         
         # Formatting
