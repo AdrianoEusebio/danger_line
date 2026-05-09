@@ -1,112 +1,27 @@
-# 💡 IDEIA 1 — Modelo de IA Gratuito como Base do Sistema
+# 🧠 IDEIA 1 — Obsidian como Knowledge Engine (Agnóstico)
 
-## Conceito
+## 1. O Vault como Banco de Dados Vivo
+O Obsidian é o repositório central de inteligência. A integração é projetada para ser **independente da IDE**, funcionando via sistema de arquivos e Local REST API.
 
-O sistema deve operar com uma IA gratuita como motor principal, delegando para a IA paga apenas quando necessário. A IA base é responsável por análises, classificações e resumos — tarefas que não exigem o poder computacional de modelos premium.
+## 2. Ecossistema de Plugins Sinergistas
+Para extrair o máximo valor, o sistema se apoia nestes plugins do Obsidian:
+1.  **Local REST API**: Permite que qualquer interface (MCP, CLI ou Script) interaja com o conhecimento.
+2.  **Dataview**: Gera dashboards dinâmicos (ex: "Lista de todos os Playbooks de Backend").
+3.  **Templater**: Padroniza a criação de notas de acordo com o contexto ativo (Frontend/Backend).
+4.  **Tag Wrangler**: Organiza as especialidades através de tags hierárquicas.
+5.  **Graph Analysis**: Para visualizar e analisar a conexão entre soluções de diferentes projetos.
+6.  **Advanced URI**: Para permitir que o sistema envie comandos de navegação profunda para o Obsidian.
 
-## Providers Disponíveis
+## 3. Estrutura de Pastas (Multi-Brain Architecture)
+O vault é organizado para suportar múltiplos contextos conectados:
+- `00_Core_Library/`: Conhecimento universal (padrões de projeto, clean code).
+- `01_Backend/`: Contexto especializado em APIs, bancos de dados e performance.
+- `02_Frontend/`: Contexto especializado em UI/UX, frameworks e estado.
+- `03_Infrastructure/`: Contexto de deploy, docker e cloud.
+- `🐞 BugTracker/`: Repositório global de erros e soluções higienizadas.
 
-### Groq (Recomendado como Primary)
-- **API gratuita** com rate limits generosos (~500K tokens/dia no Llama 8B)
-- **Velocidade extrema**: inference em hardware LPU, ~10x mais rápido que GPT
-- **Modelos disponíveis**: Llama 3.1 8B (rápido), Llama 3.3 70B (preciso)
-- **Sem custo** e sem cartão de crédito
-
-### Gemini Flash (Fallback Cloud)
-- **API gratuita** com ~1M tokens/dia
-- **Google AI Studio** para chave de API
-- **Modelo**: Gemini 2.0 Flash — boa capacidade de análise de código
-- **Vantagem**: Janela de contexto enorme (1M tokens)
-
-### Ollama / LLM Local (Fallback Offline)
-- **Modelo atual**: `gemma4:e4b` — muito limitado em contexto
-- **Problema**: Janela de contexto pequena (~4K tokens), respostas lentas
-- **Uso viável**: Apenas para tarefas extremamente simples (classificação binária, extração de keywords)
-
-## Integração com Antigravity
-
-**SIM, é possível integrar diretamente!** Via MCP (Model Context Protocol):
-
-1. O Danger Line roda como um **MCP Server** usando FastMCP
-2. O Antigravity se conecta via `mcp_config.json`
-3. O Gemini (que o Antigravity usa) pode chamar as tools do Danger Line
-4. Resultado: **O Antigravity É a IA potente**, e o Danger Line é o assistente que prepara contexto
-
-Isso significa que ao usar o Antigravity com o MCP do Danger Line configurado, o Gemini 2.5 (ou Claude) terá acesso direto às análises otimizadas do sistema.
-
-## Passos Técnicos
-
-### Passo 1: Configurar Provider Abstraction
-```python
-# src/providers/base.py
-from abc import ABC, abstractmethod
-
-class AIProvider(ABC):
-    @abstractmethod
-    async def complete(self, prompt: str, system: str = "") -> str: ...
-    
-    @abstractmethod
-    async def is_available(self) -> bool: ...
-    
-    @abstractmethod
-    def get_token_count(self, text: str) -> int: ...
-```
-
-### Passo 2: Implementar Groq Provider
-```python
-# src/providers/groq_provider.py
-from groq import Groq
-
-class GroqProvider(AIProvider):
-    def __init__(self):
-        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-        self.model = "llama-3.1-8b-instant"  # rápido para classificação
-```
-
-### Passo 3: Implementar Gemini Flash Provider
-```python
-# src/providers/gemini_provider.py
-import google.generativeai as genai
-
-class GeminiFlashProvider(AIProvider):
-    def __init__(self):
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        self.model = genai.GenerativeModel("gemini-2.0-flash")
-```
-
-### Passo 4: Implementar Chain of Fallback
-```python
-# src/providers/chain.py
-class ProviderChain:
-    def __init__(self):
-        self.providers = [
-            GroqProvider(),
-            GeminiFlashProvider(),
-            OllamaProvider(),
-        ]
-    
-    async def complete(self, prompt, system=""):
-        for provider in self.providers:
-            if await provider.is_available():
-                return await provider.complete(prompt, system)
-        raise NoProviderAvailableError()
-```
-
-### Passo 5: Sobre a LLM Local
-A LLM local (`gemma4:e4b`) pode ser usada na lógica de forma limitada:
-- **Chunking**: Dividir o código em pedaços de ~2K tokens
-- **Classificação binária**: "É erro de sintaxe? SIM/NÃO" (prompts curtos)
-- **Extração de keywords**: Não requer contexto grande
-- **Cache de respostas**: Evitar reprocessar o mesmo código
-
-> **Veredicto**: Usar Groq como primary, Gemini Flash como fallback, Ollama apenas para tarefas offline muito simples.
+## 4. Integração com o Core
+O Módulo Obsidian (`src/modules/obsidian/`) garante que a IA tenha acesso ao contexto certo no momento certo, injetando wikilinks e metadados que facilitam a navegação tanto para a IA quanto para o desenvolvedor humano.
 
 ---
-
-## Riscos e Mitigações
-
-| Risco | Mitigação |
-|-------|-----------|
-| Rate limit do Groq | Fallback automático para Gemini Flash |
-| Ollama muito lento | Usar apenas para cache warmup e classificação |
-| API keys expostas | `.env` + nunca commitar chaves |
+> **Status**: Sincronizado com a nova arquitetura agnóstica. Removida lógica de pastas por projeto local.
