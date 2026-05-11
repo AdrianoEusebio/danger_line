@@ -41,6 +41,26 @@ class KnowledgeEngine:
             logger.error(f"Error in capture pipeline: {e}")
             return False
 
+    async def register_project(self, name: str, path: str, stack: list, description: str) -> bool:
+        """Creates or updates a Project Master Card in the vault."""
+        try:
+            logger.info(f"Registering project master card: {name}")
+            
+            # Create the note using the project template
+            final_note = KBTemplate.project_master_card(
+                name=name,
+                path=path,
+                stack=stack,
+                description=description
+            )
+            
+            # Save to the special "🗂️ Projects" folder
+            return self.vault.save_note("🗂️ Projects", name, final_note)
+            
+        except Exception as e:
+            logger.error(f"Error registering project: {e}")
+            return False
+
     async def capture_bugfix(self, error_log: str, project: str, brain: str) -> bool:
         """Full pipeline: Sanitize -> Distill -> Save as Bugfix."""
         try:

@@ -38,8 +38,12 @@ class KBTemplate:
 - **Path:** `{path}`
 
 ## 🧠 Knowledge Landscape
-- [[wikilinks_to_patterns]]
-- [[wikilinks_to_specs]]
+- [[Patterns - {name}]]
+- [[Specs - {name}]]
+- [[Bugfixes - {name}]]
+
+> [!TIP]
+> Use o plugin Dataview para listar notas automaticamente aqui.
 
 ## 🛠️ Active Contexts
 - #backend

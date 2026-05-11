@@ -103,6 +103,24 @@ Check the resource `context://active` to see what is currently available in the 
 """
 
 @mcp.tool()
+async def register_project(name: str, path: str, stack: list, description: str) -> str:
+    """
+    Registers a new project or updates an existing Project Master Card in Obsidian.
+    Use this when analyzing a project for the first time or identifying stack changes.
+    """
+    logger.info(f"MCP Request: Register project {name}")
+    success = await knowledge_engine.register_project(
+        name=name,
+        path=path,
+        stack=stack,
+        description=description
+    )
+    
+    if success:
+        return f"Project Master Card for '{name}' successfully created/updated in Obsidian."
+    return f"Failed to register project '{name}'. Check server logs."
+
+@mcp.tool()
 async def commit_knowledge(raw_data: str, name: str, note_type: str = "Pattern") -> str:
     """
     Sanitizes, distills, and saves new knowledge to the Obsidian KB.
