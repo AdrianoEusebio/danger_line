@@ -1,5 +1,12 @@
 import sys
 import os
+
+# Force UTF-8 encoding for standard streams
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
+
 from src.modules.mcp.server import start_server
 from src.shared.logger import logger
 

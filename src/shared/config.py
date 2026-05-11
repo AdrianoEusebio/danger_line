@@ -37,7 +37,7 @@ class Config:
             missing.append("GEMINI_API_KEY or GROQ_API_KEY")
             
         if missing:
-            print(f"⚠️ Warning: Missing essential config: {', '.join(missing)}")
+            print(f"Warning: Missing essential config: {', '.join(missing)}")
             return False
         return True
 

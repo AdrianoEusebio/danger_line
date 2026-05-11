@@ -64,6 +64,44 @@ async def query_kb(query: str) -> str:
 
     return "\n".join(results)
 
+@mcp.resource("context://active")
+def get_active_context_resource() -> str:
+    """Returns a summary of the active brain context and available notes."""
+    ctx = context_manager.get_active_context()
+    folders = context_manager.get_relevant_folders()
+    
+    summary = [
+        f"=== Danger Line Active Context: {ctx.name} ===",
+        f"Description: {ctx.description}",
+        "Available Folders: " + ", ".join(folders),
+        "\nNote: You should use 'query_kb' to see the content of these folders."
+    ]
+    
+    for folder in folders:
+        notes = knowledge_engine.vault.list_notes(folder)
+        if notes:
+            # List up to 5 notes to give a glimpse
+            summary.append(f"- {folder}: {', '.join(notes[:5])}")
+            
+    return "\n".join(summary)
+
+@mcp.prompt()
+def init_assistant() -> str:
+    """Standard instructions to force the assistant to use the Danger Line KB."""
+    ctx = context_manager.get_active_context().name
+    return f"""
+You are an expert developer integrated with Danger Line (Agnostic Intelligence Ecosystem).
+Your current active brain context is: {ctx}
+
+Operational Protocol:
+1. BEFORE proposing any technical solution, ALWAYS call `query_kb` with relevant keywords to check if there is an existing pattern or playbook in the Obsidian vault.
+2. ALWAYS prioritize patterns found in the KB over generic knowledge, as they represent the project's specific "Source of Truth".
+3. After solving a bug or implementing a new feature, ALWAYS offer to save the discovery using `commit_knowledge`.
+4. If you notice a change in the tech stack (e.g., from Python to JavaScript), use `switch_brain` to maintain alignment.
+
+Check the resource `context://active` to see what is currently available in the brain.
+"""
+
 @mcp.tool()
 async def commit_knowledge(raw_data: str, name: str, note_type: str = "Pattern") -> str:
     """
