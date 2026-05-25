@@ -1,27 +1,20 @@
-# 🧠 IDEIA 1 — Obsidian como Knowledge Engine (Agnóstico)
+# 🧠 IDEIA 1 — Obsidian como Knowledge Engine Nativo
 
 ## 1. O Vault como Banco de Dados Vivo
-O Obsidian é o repositório central de inteligência. A integração é projetada para ser **independente da IDE**, funcionando via sistema de arquivos e Local REST API.
+O Obsidian é o repositório central e absoluto de inteligência do Danger Line. A integração, no entanto, passa a ser 100% via sistema de arquivos local (DFS), abandonando APIs e dependências que exijam que o aplicativo do Obsidian esteja rodando.
 
-## 2. Ecossistema de Plugins Sinergistas
-Para extrair o máximo valor, o sistema se apoia nestes plugins do Obsidian:
-1.  **Local REST API**: Permite que qualquer interface (MCP, CLI ou Script) interaja com o conhecimento.
-2.  **Dataview**: Gera dashboards dinâmicos (ex: "Lista de todos os Playbooks de Backend").
-3.  **Templater**: Padroniza a criação de notas de acordo com o contexto ativo (Frontend/Backend).
-4.  **Tag Wrangler**: Organiza as especialidades através de tags hierárquicas.
-5.  **Graph Analysis**: Para visualizar e analisar a conexão entre soluções de diferentes projetos.
-6.  **Advanced URI**: Para permitir que o sistema envie comandos de navegação profunda para o Obsidian.
+## 2. A Nova Estrutura Unificada (Sem Stacks)
+Para simplificar e reduzir a fragmentação de conhecimento (já que não usamos mais "context switchers" entre Backend e Frontend), a organização do Obsidian passa a se focar em **domínios de problema e abstração** em vez de stacks tecnológicas.
 
-## 3. Estrutura de Pastas (Multi-Brain Architecture)
-O vault é organizado para suportar múltiplos contextos conectados:
-- `00_Core_Library/`: Conhecimento universal (padrões de projeto, clean code).
-- `01_Backend/`: Contexto especializado em APIs, bancos de dados e performance.
-- `02_Frontend/`: Contexto especializado em UI/UX, frameworks e estado.
-- `03_Infrastructure/`: Contexto de deploy, docker e cloud.
-- `🐞 BugTracker/`: Repositório global de erros e soluções higienizadas.
+### Estrutura de Diretórios Recomendada
+- `🧩 Padrões/`: Princípios de Clean Code, arquitetura de software unificada, abstrações. (Ex: "Como fazemos injeção de dependência neste projeto").
+- `🐛 BugTracker/`: Repositório global de erros e resoluções, classificados por tags do Obsidian.
+- `🚀 Funcionalidades/`: Especificações técnicas (Specs) de regras de negócio e fluxos.
+- `📚 Playbooks/`: Manuais e guias passo a passo para fazer deploy, configurar ambiente, etc.
+
+## 3. O Poder do Dataview e Metadados
+Embora não nos comuniquemos via API, ainda utilizamos o formato rico do Obsidian. O Módulo Obsidian do Danger Line escreverá as notas contendo Frontmatter YAML e `#tags` muito precisas.
+A IA da IDE poderá ler e cruzar essas informações no diretório. E para o usuário humano, plugins do Obsidian como o **Dataview** vão ler esses metadados gerados pela IA e construir dashboards fantásticos dentro do próprio aplicativo Obsidian.
 
 ## 4. Integração com o Core
-O Módulo Obsidian (`src/modules/obsidian/`) garante que a IA tenha acesso ao contexto certo no momento certo, injetando wikilinks e metadados que facilitam a navegação tanto para a IA quanto para o desenvolvedor humano.
-
----
-> **Status**: Sincronizado com a nova arquitetura agnóstica. Removida lógica de pastas por projeto local.
+O Módulo Obsidian (`src/modules/obsidian/`) implementa classes de controle padrão para abstrair a leitura e formatação dos wikilinks (`[[arquivo]]`). Isso garante que a IA não quebre a "saúde" da sua wiki ao salvar novos arquivos.

@@ -1,37 +1,26 @@
-# ❓ DÚVIDAS — DANGER LINE
+# ❓ DÚVIDAS — DANGER LINE (Refatoração 4.0)
 
-## 1. Dúvidas sobre a Remodelagem
+## 1. Dúvidas sobre a Nova Estrutura Obsidian
 
-### Q-01: Por que remover a pasta `danger_line/` local dos projetos?
-**R**: Porque o foco agora é **Zero Footprint**. Centralizar tudo no Obsidian facilita a busca global, o backup e evita que arquivos de metadados "sujem" os repositórios de código. O Obsidian já é o local de organização, então faz sentido que ele seja o repositório físico do conhecimento.
+### Q-01: Sem os "múltiplos cérebros" de Backend/Frontend, como a IA acha a coisa certa?
+**R**: Confiamos na inteligência sistêmica da IA da IDE (Antigravity). Quando ela pesquisa `query_kb("autenticação backend")`, nós apenas precisamos ter arquivos e nomes bem organizados. A IA atual consegue entender o contexto global sem precisar ser forçada a uma "caixa" de stack.
 
-### Q-02: Como o sistema identifica um projeto sem uma pasta local?
-**R**: O sistema utiliza o **Path Absoluto** ou o nome do repositório como identificador único. No Obsidian, haverá um mapeamento entre o Path do projeto e seu respectivo Project Card.
+### Q-02: Como vamos lidar com metadados?
+**R**: A ideia é criar uma classe `MarkdownBuilder` reutilizável que force sempre a injeção de propriedades consistentes (Data, Autor, Tags) no Frontmatter do YAML, garantindo que tudo fique localizável tanto para scripts futuros quanto para o usuário via Dataview.
 
-### Q-03: Qual a vantagem de separar em Módulo MCP e Módulo Obsidian?
-**R**: **Modularidade e Escalabilidade**. Se amanhã quisermos trocar o Obsidian pelo Notion ou outra ferramenta, basta trocar o Módulo Obsidian. Se quisermos criar uma interface Slack em vez de MCP, basta adicionar um Módulo Slack. O Core permanece intacto.
+## 2. Novas Ideias para o Futuro Próximo
 
-### Q-04: Como será a integração com Voz?
-**R**: O sistema terá uma API interna (Core) que receberá comandos. O módulo de voz converterá fala em texto e chamará as funções do Core, permitindo, por exemplo, perguntar: "Danger Line, qual o padrão de autenticação do projeto X?" e receber a resposta lida do Obsidian.
+### Ideia A: Tags Semânticas em vez de Pastas Rígidas
+Em vez de depender de diretórios físicos engessados, podemos colocar quase todas as anotações em diretórios de nível superior (ex: `/Notas`) e abusar do sistema de propriedades do Obsidian. A IA escreve `#backend`, `#auth`, `#bugfix` nos arquivos, permitindo cruzamentos incríveis no Graph View.
 
----
+### Ideia B: Ferramenta de "Graph Explore" via MCP
+Em vez de só ler arquivos, e se o Danger Line pudesse extrair os links dentro de um documento Markdown específico e dizer à IA quais outras anotações estão fortemente ligadas a ele? O Danger Line processa a regex `\[\[(.*?)\]\]` e cria um mapa mental instantâneo para o Antigravity navegar.
 
-## 2. Dúvidas Técnicas (Nova Fase)
-
-### Q-05: Como o MCP Resource será usado?
-**R**: Os resources serão usados para expor dados dinâmicos. Por exemplo, podemos ter um resource chamado `obsidian://current-project-rules` que a IA lê sempre que entra em um projeto, garantindo que ela siga os padrões documentados no Obsidian sem que o usuário precise explicar.
-
-### Q-06: O sistema ainda economiza tokens?
-**R**: Sim, de forma mais inteligente. Em vez de enviar o código bruto para a IA analisar, enviamos o **conhecimento já destilado** do Obsidian. Isso é muito mais denso e consome menos tokens do que código bruto redundante.
-
-### Q-07: Precisamos de um servidor rodando?
-**R**: Para o MCP, o Antigravity inicia o processo automaticamente. Para futuras integrações (como Voz ou Web), um pequeno servidor local (FastAPI) pode ser necessário como módulo de orquestração.
-
----
+### Ideia C: Regras por Projetos (Project-specific Rules)
+Se o Danger Line já gerencia o Obsidian do desenvolvedor, podemos armazenar no Obsidian regras como: "No projeto `XPTO`, não utilize `for` loops, utilize `.map()`". O Danger Line poderia exportar um resource MCP automático, então sempre que a IA entra na pasta do projeto XPTO, ela lê o resource associado.
 
 ## 3. Próximos Passos de Decisão
 
-- [ ] Definir a estrutura exata de pastas dentro do Vault do Obsidian.
-- [ ] Escolher a biblioteca de reconhecimento de voz para o módulo futuro.
-- [ ] Mapear as 5 ferramentas iniciais do Módulo MCP.
-- [ ] Criar o template padrão do Project Card v3.
+- [ ] Validar se precisamos manter a limpeza de dados sensíveis (Sanitizer) internamente, ou apenas pedir via system-prompt para o Antigravity não registrar chaves e senhas no Obsidian.
+- [ ] Construir as classes fundamentais `ObsidianVaultManager` (para manipulação de arquivos) no diretório `/src/modules/obsidian/`.
+- [ ] Definir o template estrito do YAML gerado quando usarmos a tool `commit_knowledge`.

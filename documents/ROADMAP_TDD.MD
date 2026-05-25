@@ -1,43 +1,31 @@
-# 🚀 ROADMAP TDD — DANGER LINE
+# 🚀 ROADMAP TDD — DANGER LINE (Refatoração 4.0)
 
-Este documento serve como a "Definição de Pronto" para o sistema, cobrindo desde as bases fundamentais até a inteligência avançada do Ecossistema Agnóstico.
+Este documento dita a construção baseada na nova arquitetura unificada e simplificada, focada em classes base (Default Classes) e exclusividade do ecossistema MCP.
 
 ---
 
-## 🟢 FASE 1: Fundação e Infraestrutura (O Básico) [CONCLUÍDO]
-- [x] **Configuração do Workspace**: Inicializar projeto com `uv`, configurar `pyproject.toml` e estrutura `src/`.
-- [x] **Gestão de Config**: Módulo para carregar `.env`, validar caminhos do Obsidian e chaves de API.
-- [x] **Server FastMCP**: Servidor básico rodando e sendo detectado por clientes MCP (Antigravity/Claude).
-- [x] **Módulo de Logging**: Sistema de logs centralizado para depuração do sistema.
+## 🟢 FASE 1: Limpeza e Fundação Base [CONCLUÍDO]
+- [x] **Limpeza de Módulos Legados**: Deletar módulos internos de providers (Groq/Gemini), classificação de estrelas, Context Manager e Sanitizer.
+- [x] **Ajuste da Estrutura de Diretórios**: Definir o padrão `/src/modules/mcp/` e `/src/modules/obsidian/`.
+- [x] **Atualização das Dependências**: Reduzir bibliotecas do `requirements.txt` / `pyproject.toml` removendo LangChain ou APIs pesadas; focando apenas no FastMCP e utilitários.
 
-## 🟡 FASE 2: Módulo Obsidian (A Engrenagem) [CONCLUÍDO]
-- [x] **DFS (Direct File System)**: Implementar leitura e escrita de Markdown com preservação de codificação.
-- [x] **LRA (Local REST API)**: Cliente HTTP para comunicação com o plugin do Obsidian (Auth + Endpoints base).
-- [x] **Template Engine**: Sistema para injetar dados em notas de Specs, Playbooks e Bugfixes.
-- [x] **Vault Manager**: Lógica de organização de pastas e navegação entre `Core`, `Backend`, `Frontend`, etc.
+## 🟡 FASE 2: Engine do Obsidian (Classes Reutilizáveis) [CONCLUÍDO]
+- [x] **Classe `ObsidianVaultManager`**: Desenvolver classe padrão que resolve o path do vault e lida de forma segura com acesso I/O de diretórios.
+- [x] **Classe `MarkdownBuilder` / Parser**: Utilitário dedicado para gerar templates consistentes com Frontmatter YAML e formatação amigável para o app do Obsidian.
+- [x] **Lógica de Busca Simples**: Sistema rápido para varrer o vault por tags ou títulos que a IDE requisitar.
 
-## 🛡️ FASE 3: Módulo Sanitizer (A Segurança) [CONCLUÍDO]
-- [x] **Static Shield**: Regex para bloqueio de chaves de API, segredos e arquivos proibidos (`.env`).
-- [x] **Dynamic Scrubber**: Integração com IA base para limpeza de dados sensíveis em textos dinâmicos.
-- [x] **Anonymizer**: Módulo para transformar referências privadas em conceitos genéricos/técnicos.
+## 🛡️ FASE 3: Interface MCP Enxuta e "Graph Explore" [CONCLUÍDO]
+- [x] **Implementar Tool `query_kb(query, tags)`**: Expõe a lógica de busca do Obsidian (baseada em **Tags Semânticas - Ideia A**), retornando arquivos consolidados e formatados.
+- [x] **Implementar Tool `commit_knowledge`**: Interface para a IA criar e atualizar manuais/bugs no Obsidian com validação rigorosa e YAML obrigatório.
+- [x] **Implementar Tool `explore_graph` (Ideia B)**: Tool MCP capaz de ler wikilinks de uma nota raiz e retornar o resumo da teia de conhecimento conectada.
+- [x] **Implementar Project Rules via Resources (Ideia C)**: Expor dinamicamente diretrizes de projetos como um resource MCP baseado na pasta local aberta do desenvolvedor.
 
-## 🔄 FASE 4: Context Switcher (Múltiplos Cérebros) [CONCLUÍDO]
-- [x] **State Manager**: Controle do contexto ativo (Ex: `ctx = "backend"`).
-- [x] **Context Filter**: Função que filtra as buscas e injeção de contexto baseada na pasta ativa do Obsidian.
-- [x] **Auto-Detection**: Lógica para sugerir a troca de cérebro baseada na extensão e conteúdo dos arquivos abertos.
-
-## 🧠 FASE 5: Core & Destilação KB (A Inteligência) [CONCLUÍDO]
-- [x] **Distiller Engine**: Prompt system para transformar logs/códigos brutos em notas no formato "IA-Optimized".
-- [x] **Knowledge Linker**: Criação automática de `[[wikilinks]]` entre novas descobertas e o conhecimento global.
-- [x] **Semantic Search**: Interface de busca que consulta o Obsidian e retorna o contexto mais denso para a IA.
-
-## 🔌 FASE 6: Interface MCP & E2E (O Produto) [CONCLUÍDO]
-- [x] **Tool: `query_kb`**: Permite que a IA busque soluções e especificações no Obsidian.
-- [x] **Tool: `commit_knowledge`**: Permite que a IA salve novos padrões e resoluções de bugs diretamente no KB.
-- [x] **AI Adapter Layer**: Garantir que o sistema funcione trocando o provider (Gemini <-> Groq <-> Ollama).
-- [x] **Validation Walkthrough**: Teste real de ponta a ponta: Identificar bug -> Buscar no KB -> Resolver -> Salvar nova Spec.
+## 🔄 FASE 4: Testes Unitários e Validação E2E [CONCLUÍDO]
+- [x] Testar se o `MarkdownBuilder` gera as anotações do jeito esperado, não quebrando o formato do Obsidian (ex: espaços indevidos no Frontmatter).
+- [x] Mockar a IDE usando o Inspector do FastMCP para validar as queries de escrita e leitura de forma isolada (validado via script de testes E2E).
+- [x] Adotar o fluxo "no-magic": garantir que se der algum erro, os logs do MCP informem claramente a IA de forma acionável.
 
 ---
 
 ## 📈 Progresso Geral: [ 100% ]
-*(Atualizar este documento a cada milestone concluído)*
+*(Atualizado após a execução bem-sucedida de todas as fases)*

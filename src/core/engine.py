@@ -1,7 +1,5 @@
-from src.modules.sanitizer.engine import sanitizer
-from src.modules.obsidian.vault import VaultManager
-from src.modules.obsidian.templates import KBTemplate
-from src.core.distiller import Distiller
+from src.modules.obsidian.vault_manager import VaultManager
+from src.modules.obsidian.markdown_parser import MarkdownBuilder
 from src.shared.logger import logger
 
 class KnowledgeEngine:
@@ -9,36 +7,34 @@ class KnowledgeEngine:
     
     def __init__(self):
         self.vault = VaultManager()
-        self.distiller = Distiller()
 
-    async def capture_pattern(self, raw_data: str, name: str, project: str, brain: str) -> bool:
-        """Full pipeline: Sanitize -> Distill -> Save as Pattern."""
+    async def capture_pattern(self, name: str, content: str, tags: list = None, project: str = "Global", folder: str = "🧩 Padrões") -> bool:
+        """Saves a technical pattern directly to the vault."""
         try:
-            logger.info(f"Capturing new pattern: {name}")
+            logger.info(f"Saving new pattern: {name}")
             
-            # 1. Sanitize raw data
-            clean_raw = await sanitizer.clean(raw_data)
-            
-            # 2. Distill into AI-optimized content
-            distilled_content = await self.distiller.distill(clean_raw, note_type="Pattern")
-            if not distilled_content:
-                return False
-                
-            # 3. Create the final note using templates
-            final_note = KBTemplate.atomic_pattern(
-                name=name,
-                project=project,
-                brain=brain,
-                context="Automatically captured logic.",
-                content=distilled_content
-            )
-            
-            # 4. Save to vault (using the correct brain folder)
-            folder = brain # In real use, this would map to 01_Backend, etc.
+            metadata = {
+                "type": "Pattern",
+                "project": project,
+                "category": "technical-pattern",
+                "tags": ["pattern", project.lower()] + (tags or [])
+            }
+            body = f"""# 🧠 Pattern: {name}
+
+## Context
+Captured logic.
+
+## Implementation Details
+{content}
+
+## 🔗 Related
+- [[Project Master Card: {project}]]
+"""
+            final_note = MarkdownBuilder.build(metadata, body)
             return self.vault.save_note(folder, name, final_note)
             
         except Exception as e:
-            logger.error(f"Error in capture pipeline: {e}")
+            logger.error(f"Error saving pattern: {e}")
             return False
 
     async def register_project(self, name: str, path: str, stack: list, description: str) -> bool:
@@ -46,42 +42,65 @@ class KnowledgeEngine:
         try:
             logger.info(f"Registering project master card: {name}")
             
-            # Create the note using the project template
-            final_note = KBTemplate.project_master_card(
-                name=name,
-                path=path,
-                stack=stack,
-                description=description
-            )
-            
-            # Save to the special "🗂️ Projects" folder
+            metadata = {
+                "type": "ProjectCard",
+                "project": name,
+                "path": path,
+                "stack": stack,
+                "status": "active"
+            }
+            body = f"""# 🗂️ Project Master Card: {name}
+
+## 📝 Description
+{description}
+
+## 🏗️ Architecture & Stack
+- **Primary Stack:** {', '.join(stack)}
+- **Path:** `{path}`
+
+## 🧠 Knowledge Landscape
+- [[Patterns - {name}]]
+- [[Specs - {name}]]
+- [[Bugfixes - {name}]]
+
+> [!TIP]
+> Use o plugin Dataview para listar notas automaticamente aqui.
+"""
+            final_note = MarkdownBuilder.build(metadata, body)
             return self.vault.save_note("🗂️ Projects", name, final_note)
             
         except Exception as e:
             logger.error(f"Error registering project: {e}")
             return False
 
-    async def capture_bugfix(self, error_log: str, project: str, brain: str) -> bool:
-        """Full pipeline: Sanitize -> Distill -> Save as Bugfix."""
+    async def capture_bugfix(self, error_log: str, solution: str, project: str = "Global") -> bool:
+        """Saves a bugfix playbook directly to the vault."""
         try:
-            logger.info(f"Capturing bugfix for project: {project}")
+            logger.info(f"Saving bugfix for project: {project}")
             
-            clean_log = await sanitizer.clean(error_log)
-            distilled_solution = await self.distiller.distill(clean_log, note_type="Bugfix")
-            if not distilled_solution:
-                return False
-                
-            final_note = KBTemplate.bugfix_playbook(
-                error=error_log[:50] + "...", # Simplified error name
-                project=project,
-                brain=brain,
-                solution=distilled_solution
-            )
-            
-            return self.vault.save_note("🐞 BugTracker", f"fix-{project}-{brain}", final_note)
+            metadata = {
+                "type": "Bugfix",
+                "project": project,
+                "error_code": error_log[:50] + "...",
+                "tags": ["bugfix", project.lower()]
+            }
+            body = f"""# 🐞 Bugfix Playbook: {error_log[:50]}...
+
+## Problem Analysis
+{error_log} detected in {project}.
+
+## 🔧 Solution (Playbook)
+{solution}
+
+## Prevention
+- [ ] Add check for X
+- [ ] Update config Y
+"""
+            final_note = MarkdownBuilder.build(metadata, body)
+            return self.vault.save_note("🐞 BugTracker", f"fix-{project}", final_note)
             
         except Exception as e:
-            logger.error(f"Error in bugfix pipeline: {e}")
+            logger.error(f"Error saving bugfix: {e}")
             return False
 
 # Singleton

@@ -4,31 +4,30 @@
 
 ## Identificação do Projeto
 
-| Campo | Valor |
-|-------|-------|
-| **Nome** | Danger Line |
-| **Tipo** | Knowledge Base + MCP Server + CLI |
-| **Versão** | 3.0.0 (Refatoração Estratégica) |
-| **Linguagem Principal** | Python 3.11+ |
-| **Licença** | Privada |
-| **Autor** | Adrian |
-| **Vault Obsidian** | `C:/Users/adria/OneDrive/Documentos/Danger_line/Danger Line` |
+| Campo                   | Valor                                                        |
+| -------------------------| --------------------------------------------------------------|
+| **Nome**                | Danger Line                                                  |
+| **Tipo**                | MCP Server nativo                                            |
+| **Versão**              | 4.0.0 (Simplificação Arquitetural)                           |
+| **Linguagem Principal** | Python 3.11+                                                 |
+| **Licença**             | Privada                                                      |
+| **Autor**               | Adrian                                                       |
+| **Vault Obsidian**      | `C:/Users/adria/OneDrive/Documentos/Danger_line/Danger Line` |
 
 ---
 
-## Arquitetura Modular
+## Arquitetura Base
 
-O sistema é construído sobre dois módulos fundamentais e independentes:
+O sistema é focado exclusivamente em duas responsabilidades centrais, implementadas via classes reutilizáveis:
 
-### 1. Módulo MCP (Model Context Protocol)
-- **Função**: Interface de comunicação com IAs (Antigravity).
-- **Componentes**: FastMCP, handlers de ferramentas, definição de recursos.
-- **Responsabilidades**: Expor o KB para a IA, permitir que a IA crie notas, busque contexto e analise projetos.
+### 1. Módulo MCP (Comunicação IDE)
+- **Função**: Expor as capacidades do sistema via Model Context Protocol para a IDE (Antigravity).
+- **Framework**: `FastMCP`.
+- **Foco Técnico**: Código enxuto; converte comandos da IA em chamadas para as classes de negócio internas.
 
 ### 2. Módulo Obsidian (Knowledge Engine)
-- **Função**: Gerenciamento do vault e estrutura KB.
-- **Componentes**: Leitor/Escritor de Markdown, Linker de notas, Template engine.
-- **Responsabilidades**: Manter a integridade do wiki, organizar Project Cards, gerenciar [[wikilinks]] e metadados (frontmatter).
+- **Função**: Operações diretas de leitura/escrita no disco local (DFS).
+- **Foco Técnico**: Baseado em classes genéricas para manipulação segura de arquivos Markdown. Garante consistência de formatação (YAML frontmatter, wikilinks).
 
 ---
 
@@ -38,70 +37,50 @@ O sistema é construído sobre dois módulos fundamentais e independentes:
 |-------------|--------|-------------|
 | Python | 3.11+ | ✅ Sim |
 | uv | latest | ✅ Sim |
-| Obsidian | 1.5+ | ✅ Sim (Cérebro do sistema) |
-| Antigravity IDE | latest | ✅ Sim (Principal cliente MCP) |
-| Local REST API | Plugin | 🟡 Recomendado (Para automações via API) |
+| Obsidian | 1.5+ | ✅ Sim |
+| Antigravity IDE | latest | ✅ Sim |
 
 ---
 
-## Stack Tecnológica
+## Stack Tecnológica Simplificada
 
-### Core & Módulos
+A eliminação de APIs de terceiros (LLMs) e middlewares (APIs REST) reduz as dependências ao estritamente necessário.
+
 | Componente | Tecnologia | Justificativa |
 |-----------|------------|---------------|
-| Runtime | Python 3.11+ | Flexibilidade e ecossistema de IA. |
-| MCP Framework | `FastMCP` | Padrão da Anthropic/Google para integração de ferramentas. |
-| Obsidian Engine | Custom Python Module | Controle total sobre a estrutura do vault. |
-| Package Manager | `uv` | Velocidade e determinismo. |
-
-### IA Providers (Chain of Fallback)
-| Provider | Uso |
-|----------|-----|
-| Gemini Flash 2.0 | Análise de código, extração de padrões, classificação. |
-| Groq (Llama 3.3) | Resumos rápidos, fallback de alta performance. |
-| Ollama (Local) | Processamento offline e tarefas de baixa complexidade. |
+| Runtime | Python 3.11+ | Facilidade de manutenção e ecossistema MCP. |
+| MCP Framework | `FastMCP` | Padrão robusto para servidores MCP. |
+| File System | Módulo `pathlib` e I/O padrão | Interação direta e rápida com o Obsidian sem depender de plugins REST do aplicativo. |
+| Package Manager | `uv` | Velocidade e determinismo no ambiente. |
 
 ---
 
-## Requisitos Funcionais (Prioritários)
+## Requisitos Funcionais
 
 | ID | Requisito | Módulo |
 |----|-----------|--------|
-| RF-01 | Criar/Atualizar Project Cards no Obsidian automaticamente. | Obsidian |
-| RF-02 | Extrair padrões de código e documentar como notas vinculadas. | Obsidian |
-| RF-03 | Disponibilizar busca semântica e por wikilinks para a IA. | MCP |
-| RF-04 | Permitir que a IA escreva novas descobertas diretamente no KB. | MCP |
-| RF-05 | Gerenciar regras de workspace para Antigravity via MCP resources. | MCP |
-| RF-06 | Integrar com sistemas externos (ex: Voz) via API modular. | Core |
+| RF-01 | Receber e processar comandos via protocolo MCP. | MCP |
+| RF-02 | Escrever arquivos Markdown padronizados no diretório do Obsidian. | Obsidian |
+| RF-03 | Realizar leitura de conteúdo (busca/pesquisa) de padrões no Obsidian. | Obsidian |
+| RF-04 | Garantir formatação segura de metadados em novos arquivos. | Core/Shared |
 
 ---
 
-## Estrutura de Diretórios (Refatorada)
+## Estrutura de Diretórios Proposta (Classes Defaults)
 
 ```
 Danger_line/
 ├── src/
-│   ├── main.py                 # Entry point (CLI / MCP starter)
+│   ├── main.py                 # Inicia o servidor FastMCP
 │   ├── modules/
-│   │   ├── mcp/                # Módulo de interface MCP
-│   │   │   ├── server.py       # Definição do servidor FastMCP
-│   │   │   ├── tools.py        # Ferramentas expostas (search, write, analyze)
-│   │   │   └── resources.py    # Recursos (configurações, prompts)
-│   │   └── obsidian/           # Módulo de controle do Obsidian
-│   │       ├── vault.py        # Gestão de arquivos e pastas
-│   │       ├── templates.py    # Templates de Project Cards/Patterns
-│   │       └── kb_logic.py     # Lógica de interligação KB
-│   ├── core/                   # Lógica compartilhada e orquestração
-│   ├── providers/              # Adapters para IAs (Gemini, Groq, Ollama)
-│   └── shared/                 # Utilitários, métricas e modelos de dados
-├── documents/                  # Documentação atualizada
-├── pyproject.toml              # Configuração uv
-└── .env                        # Chaves de API e caminhos
+│   │   ├── mcp/                # Handlers e rotas MCP
+│   │   │   └── server.py
+│   │   └── obsidian/           # Lógica do Knowledge Engine
+│   │       ├── vault_manager.py  # Classe padrão de gestão do diretório local
+│   │       └── markdown_parser.py# Classe padrão para parser e escrita segura de MD
+│   ├── core/                   # Integração entre módulos e lógica principal
+│   └── shared/                 # Configurações globais e utilitários
+├── documents/                  # Documentação arquitetural simplificada
+├── pyproject.toml
+└── .env
 ```
-
----
-
-## Métricas de Sucesso
-1. **Zero Footprint**: Nenhum arquivo residual em pastas de projetos externos.
-2. **KB Hit Rate**: > 50% das dúvidas da IA resolvidas via consulta ao Obsidian.
-3. **Escalabilidade**: Adição de novos módulos (ex: Voice) sem alterar o core.
