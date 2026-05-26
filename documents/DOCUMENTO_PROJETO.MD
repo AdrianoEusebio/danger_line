@@ -1,82 +1,96 @@
-# 📖 DOCUMENTO DE PROJETO — DANGER LINE
+# 📖 DOCUMENTO DE PROJETO — DANGER LINE v5.0 (DragonScale MCP Edition)
 
-## Ecossistema MCP para Knowledge Base no Obsidian
+## Ecossistema MCP para Knowledge Base Portátil no Obsidian
 
 ---
 
 ## 1. Visão Estratégica
 
 ### 1.1 O Sistema
-O **Danger Line** foi simplificado e refatorado para atuar **exclusivamente como um Servidor MCP (Model Context Protocol)**. Sua única missão é conectar a inteligência da IDE (Antigravity) ao cérebro digital centralizado do desenvolvedor: o **Obsidian**.
+O **Danger Line v5.0** opera como um **Servidor MCP (Model Context Protocol)** robusto e portátil. Ele atua como uma interface de alta velocidade que conecta a inteligência baseada na IDE (**Antigravity**) ao banco de dados em Markdown do desenvolvedor (**Obsidian Vault**).
 
-Ao remover complexidades (como LLMs intermediários, APIs externas e CLI standalone), o sistema foca em estabilidade, performance e na construção de um fluxo de conhecimento fluido e bidirecional.
+Ao fundir o design leve e portátil com os poderosos conceitos de estruturação de conhecimento do `claude-obsidian`, o Danger Line traz consistência semântica à documentação de projetos de forma headless, multiplataforma (Windows e Linux) e direta no File System (DFS).
 
 ### 1.2 Princípios Fundamentais
-1. **Foco Único (MCP-Only)**: Nenhuma interface extra. A interação ocorre 100% via ferramentas (Tools) e recursos (Resources) acionados pela IA assistente (Antigravity).
-2. **Obsidian como Único Banco de Dados**: Todo o conhecimento é persistido e lido diretamente de um vault local do Obsidian, sem bancos de dados paralelos.
-3. **Zero Footprint**: O código dos projetos do desenvolvedor permanece intocado. O contexto fica no Obsidian.
-4. **Classes Reutilizáveis (Default Classes)**: A arquitetura do código é construída usando classes padronizadas para facilitar a expansão futura (ex: `ObsidianVaultManager`, `MarkdownParser`).
+1. **Foco Único (MCP-Nativo):** Todas as ações são orquestradas via ferramentas (Tools) e recursos (Resources) ativados de forma passiva ou ativa pela IDE.
+2. **Portabilidade Absoluta:** Lógica implementada em Python puro. Sem shell scripts ou dependências Unix rígidas, garantindo funcionamento idêntico no Windows.
+3. **Gerenciamento de Contexto Semântico:** Uso de identificadores exclusivos, análise de grafos de links e detecção de similaridade local para otimizar tokens e evitar redundâncias.
+4. **Acoplamento Inteligente ao Workspace:** Leitura silenciosa de diretórios de projetos ativos para carregamento automático de diretrizes de codificação locais.
 
 ---
 
 ## 2. Arquitetura do Sistema
 
-### 2.1 Diagrama de Arquitetura Simplificada
+### 2.1 Diagrama de Arquitetura v5.0 (Modular)
 
 ```mermaid
 graph TD
-    subgraph "Cliente"
+    subgraph "Cliente (IDE)"
         IDE["IDE Antigravity (IA Assistente)"]
     end
 
-    subgraph "Servidor MCP (Danger Line)"
-        MCP["🔌 Módulo MCP (FastMCP)"]
-        CORE["🧠 Lógica de Negócio (Reutilizável)"]
-        OBS["📓 Módulo Obsidian Engine"]
+    subgraph "Servidor MCP (Danger Line v5.0)"
+        MCP["🔌 Módulo MCP (FastMCP Tools/Resources)"]
+        
+        subgraph "Core Orchestrator"
+            ENGINE["🧠 KnowledgeEngine"]
+        end
+
+        subgraph "Subcomponentes Core (Python)"
+            LINT["🔍 Linter Engine (Órfãos, Links Mortos)"]
+            DS["🐉 DragonScale Memory (Folds, Endereços, Cosseno)"]
+            PARSE["📝 MarkdownBuilder (YAML + Tags de Densidade)"]
+        end
+
+        subgraph "Obsidian Engine"
+            VAULT["📓 VaultManager (DFS Lock-Safe)"]
+        end
     end
 
-    subgraph "Persistência"
-        VAULT["🗂️ Arquivos Locais (Vault Markdown)"]
-    end
+    subgraph "Persistência Local"
+        FILE["🗂️ Arquivos Markdown (*.md)"]
+    </subgraph>
 
     IDE <-->|Model Context Protocol| MCP
-    MCP <--> CORE
-    CORE <--> OBS
-    OBS <-->|Leitura/Escrita DFS| VAULT
+    MCP <--> ENGINE
+    ENGINE <--> DS
+    ENGINE <--> LINT
+    ENGINE <--> PARSE
+    ENGINE <--> VAULT
+    VAULT <-->|Leitura/Escrita Direta DFS| FILE
 ```
 
 ---
 
-## 3. Módulos do Sistema
+## 3. Detalhamento dos Módulos
 
-### 3.1 Módulo MCP (Interface de Comunicação)
-O ponto de entrada e saída. Define de forma limpa as ferramentas que a IA da IDE pode usar.
-- Ferramentas (Tools) expostas: `query_kb`, `commit_knowledge`.
-- Utiliza a biblioteca base do protocolo, instanciando classes que encapsulam os handlers de requisição.
+### 3.1 Módulo MCP (fastmcp)
+Ponto de entrada de comandos e recursos para a IDE. Contém:
+* **Tools:** `query_kb` (busca textual e de tags), `commit_knowledge` (gravação de manuais), `commit_bugfix` (gravação de correções), `explore_graph` (navegação em teia de links) e o novo `lint_kb` (validação de integridade).
+* **Resources:** `obsidian://overview` (visão geral do vault) e `obsidian://project-rules` (regras específicas de código do projeto ativo).
 
-### 3.2 Módulo Obsidian Engine
-Responsável por gerenciar os arquivos locais sem depender de APIs externas pesadas.
-- **Leitura/Escrita**: Interação com arquivos `*.md` baseada em caminhos absolutos no sistema de arquivos.
-- **Indexação**: Navegação nas pastas (ex: `/Bugfixes`, `/Padrões_Arquitetura`) para montar o contexto requerido.
-- Utiliza classes genéricas para interagir com o Frontmatter (YAML) e manter a formatação do Obsidian (`[[wikilinks]]`).
+### 3.2 Core Orchestrator & Subcomponentes (Python)
+* **KnowledgeEngine:** Gerencia o fluxo de gravação e as correlações (ex: afinidade de stack de projetos e links bidirecionais).
+* **Linter Engine:** Auditor local que varre o vault em busca de páginas sem saída/entrada (órfãs), links markdown apontando para notas inexistentes e metadados corrompidos.
+* **DragonScale Memory Engine:**
+  * *Folds Manager:* Realiza summarization/rollup de logs de alterações no Python.
+  * *Address Allocator:* Controla sequenciadores de ID únicos (`address: c-NNNNNN`) com concorrência segura em arquivos locais (`.vault-meta/address-counter.txt`).
+  * *Semantic Tiling:* Calcula embeddings locais de notas via Ollama (`nomic-embed-text`) e roda verificação de similaridade de cosseno para evitar notas idênticas.
+* **MarkdownBuilder:** Codifica e decodifica o cabeçalho YAML Frontmatter e o corpo das notas Markdown, aplicando tags automáticas de granularidade (`contexto/rascunho`, `contexto/medio`, `contexto/profundo`) com base no tamanho do corpo.
 
----
-
-## 4. Metodologia de Captura KB
-
-Todo o peso de identificar, classificar e resumir código passa a ser **responsabilidade da IA assistente (Antigravity)**.
-O Danger Line foca em como **armazenar** e **recuperar** esse conhecimento:
-- **Padrões de Arquitetura**: Como as coisas foram desenhadas neste projeto.
-- **Resoluções de Bugs**: Registros das falhas e como foram consertadas.
-- **Dívidas Técnicas**: Pontos de atenção que a IA descobriu e salvou para o futuro.
+### 3.3 Módulo Obsidian (VaultManager)
+Abstração de E/S direta baseada na biblioteca `pathlib`.
+* Realiza a persistência local lock-safe (garantida por travas no Python como `portalocker` para prevenir colisões no Windows).
+* Encontra caminhos de notas globais, listas de diretórios dinâmicos e consultas rápidas por tags normalizadas.
 
 ---
 
-## 5. Glossário
+## 4. Glossário do Projeto
 
 | Termo | Definição |
 |-------|-----------|
-| **MCP (Model Context Protocol)** | Protocolo padrão usado pela Antigravity para chamar ferramentas no sistema local. |
-| **Obsidian Engine** | Componente interno que traduz chamadas do MCP para arquivos Markdown compreensíveis pelo aplicativo Obsidian. |
-| **Classes Reutilizáveis** | Padrão arquitetural focado em herança e componentes genéricos para leitura/escrita e formatação. |
-| **DFS (Direct File System)** | Manipulação direta dos arquivos `.md` locais do vault do Obsidian. |
+| **DragonScale Memory** | Conjunto de mecanismos avançados de estruturação de conhecimento portados do claude-obsidian para melhorar integridade, histórico e similaridade semântica. |
+| **Direct File System (DFS)** | Acesso de leitura/gravação direto ao disco rígido local do usuário sem intermediários como APIs REST de rede ou plugins ativos. |
+| **Deterministic Addresses** | Números sequenciais estáveis e persistentes associados aos arquivos markdown para identificá-los de forma única independentemente de renomeações no vault. |
+| **Semantic Tiling** | Processo matemático de comparação por similaridade de cosseno de embeddings de textos para marcar notas conceitualmente equivalentes. |
+| **Log Folds** | Agrupamento e condensação incremental de logs cronológicos de alterações em resumos de alto nível. |
