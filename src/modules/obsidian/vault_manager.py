@@ -10,10 +10,6 @@ class VaultManager:
     def __init__(self, vault_path: Optional[str] = None):
         self.vault_path = Path(vault_path) if vault_path else Config.OBSIDIAN_VAULT_PATH
         self.folders = [
-            "🧩 Padrões",
-            "🚀 Funcionalidades",
-            "📚 Playbooks",
-            "🐞 BugTracker",
             "🗂️ Projects",
             "⚙️ System"
         ]
@@ -30,6 +26,24 @@ class VaultManager:
             if not path.exists():
                 logger.info(f"Creating vault directory: {folder}")
                 path.mkdir(parents=True, exist_ok=True)
+
+    def get_all_folders(self) -> List[str]:
+        """Returns all folders in the vault, including dynamically created project folders."""
+        try:
+            if not self.vault_path.exists():
+                return self.folders
+            folders = []
+            for p in self.vault_path.iterdir():
+                if p.is_dir() and not p.name.startswith("."):
+                    folders.append(p.name)
+            # Ensure folders contains at least the base folders
+            for folder in self.folders:
+                if folder not in folders:
+                    folders.append(folder)
+            return folders
+        except Exception as e:
+            logger.error(f"Failed to scan folders: {e}")
+            return self.folders
 
     def save_note(self, folder: str, filename: str, content: str) -> bool:
         """Saves a markdown note to the specified vault folder."""
@@ -80,7 +94,7 @@ class VaultManager:
         """Finds the folder and exact filename of a note by its name (without folder) across all vault folders."""
         # Normalize target filename
         filename = note_name if note_name.endswith(".md") else f"{note_name}.md"
-        for folder in self.folders:
+        for folder in self.get_all_folders():
             for n in self.list_notes(folder):
                 if n.lower() == filename.lower():
                     return folder, n
@@ -90,7 +104,7 @@ class VaultManager:
         """Searches notes across all folders matching the specified tags in metadata."""
         from src.modules.obsidian.markdown_parser import MarkdownBuilder
         results = []
-        for folder in self.folders:
+        for folder in self.get_all_folders():
             for note_name in self.list_notes(folder):
                 content = self.read_note(folder, note_name)
                 if content:

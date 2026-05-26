@@ -8,6 +8,32 @@ class MarkdownBuilder:
     @staticmethod
     def build(metadata: Dict[str, Any], content: str) -> str:
         """Generates a markdown string with frontmatter and body."""
+        # Calculate density tag based on body content length
+        body_len = len(content)
+        if body_len < 500:
+            density_tag = "contexto/rascunho"
+        elif body_len < 2000:
+            density_tag = "contexto/medio"
+        else:
+            density_tag = "contexto/profundo"
+
+        # Update metadata tags
+        tags = metadata.get("tags", [])
+        if not isinstance(tags, list):
+            tags = [tags] if tags else []
+        if density_tag not in tags:
+            tags = list(tags) + [density_tag]
+        metadata["tags"] = tags
+
+        # Ensure project link is in the content
+        project = metadata.get("project")
+        if project and metadata.get("type") != "ProjectCard":
+            legacy_link = f"[[Project Master Card: {project}]]"
+            if legacy_link in content:
+                content = content.replace(legacy_link, f"[[{project}]]")
+            elif f"[[{project}]]" not in content:
+                content = content.rstrip() + f"\n\n## 🔗 Relacionado\n- [[{project}]]"
+
         lines = ["---"]
         for key, value in metadata.items():
             if isinstance(value, list):

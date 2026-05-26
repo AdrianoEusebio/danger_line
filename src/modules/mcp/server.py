@@ -57,14 +57,7 @@ async def query_kb(query: str = "", tags: list = None) -> str:
             results.append(snippet)
     else:
         # Keyword-only search in filenames across all folders
-        folders = [
-            "🧩 Padrões",
-            "🚀 Funcionalidades",
-            "📚 Playbooks",
-            "🐞 BugTracker",
-            "🗂️ Projects"
-        ]
-        for folder in folders:
+        for folder in knowledge_engine.vault.get_all_folders():
             notes = knowledge_engine.vault.list_notes(folder)
             matches = [n for n in notes if query.lower() in n.lower()]
             
@@ -85,21 +78,13 @@ async def query_kb(query: str = "", tags: list = None) -> str:
 @mcp.resource("obsidian://overview")
 def get_vault_overview() -> str:
     """Returns a general overview of the folders and available notes in the Obsidian Vault."""
-    folders = [
-        "🧩 Padrões",
-        "🚀 Funcionalidades",
-        "📚 Playbooks",
-        "🐞 BugTracker",
-        "🗂️ Projects"
-    ]
-    
     summary = [
         "=== Danger Line Vault Overview ===",
         "Below is a list of available directories in your Knowledge Base and the notes inside them:",
         ""
     ]
     
-    for folder in folders:
+    for folder in knowledge_engine.vault.get_all_folders():
         notes = knowledge_engine.vault.list_notes(folder)
         if notes:
             summary.append(f"📁 {folder} ({len(notes)} notes):")
@@ -211,24 +196,24 @@ async def commit_knowledge(name: str, content: str, tags: list = None, folder: s
     """
     Saves new knowledge (specs, playbooks, architectural patterns) directly to the Obsidian KB.
     Use this to persist technical learnings, patterns, or manuals.
+    It will be saved inside the project's folder.
     """
-    logger.info(f"Committing new knowledge: {name} in {folder} with tags={tags}")
+    logger.info(f"Committing new knowledge: {name} under project {project} with tags={tags}")
     success = await knowledge_engine.capture_pattern(
         name=name,
         content=content,
         tags=tags,
-        project=project,
-        folder=folder
+        project=project
     )
     
     if success:
-        return f"Knowledge successfully committed to folder '{folder}' as '{name}'."
+        return f"Knowledge successfully committed to project '{project}' as '{name}'."
     return "Failed to commit knowledge. Check logs for details."
 
 @mcp.tool()
 async def commit_bugfix(error_log: str, solution: str, project: str = "Global") -> str:
     """
-    Saves a bugfix playbook to the BugTracker folder in the Obsidian KB.
+    Saves a bugfix playbook directly to the project's folder in the Obsidian KB.
     Use this after resolving a bug to persist the solution.
     """
     logger.info(f"Committing bugfix for project: {project}")
